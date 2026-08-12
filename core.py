@@ -1,33 +1,55 @@
-import json
-import os
+from typing import List, Dict, Any
 
-def load_game_data(file_path):
-    if not os.path.isfile(file_path):
-        raise FileNotFoundError(f"No such file: '{file_path}'")
-    with open(file_path, 'r') as file:
-        data = json.load(file)
-    return data
+class Game:
+    """
+    Represents a game instance with various configurations and attributes.
+    """
+    def __init__(self, title: str, genre: str, settings: Dict[str, Any]) -> None:
+        self.title = title
+        self.genre = genre
+        self.settings = settings
+
+    def start(self) -> None:
+        """
+        Starts the game and initializes settings.
+        """
+        print(f"Starting {self.title}...")
+        # Initialize settings, graphics, etc.
+        for key, value in self.settings.items():
+            print(f"Setting {key} to {value}")
+
+    def save(self) -> None:
+        """
+        Saves the current state of the game.
+        """
+        print(f"Saving {self.title}...")
+
+    def load(self) -> None:
+        """
+        Loads the previous game state.
+        """
+        print(f"Loading {self.title}...")
 
 
-def save_game_data(file_path, data):
-    with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+def create_game(title: str, genre: str, settings: Dict[str, Any]) -> Game:
+    """
+    Factory function to create a new game instance.
+    """
+    return Game(title, genre, settings)
 
 
-def update_game_score(data, player_id, score):
-    if player_id in data:
-        data[player_id]['score'] += score
-    else:
-        data[player_id] = {'score': score}
+games: List[Game] = []
 
 
-def get_top_players(data, top_n=5):
-    sorted_players = sorted(data.items(), key=lambda item: item[1]['score'], reverse=True)
-    return dict(sorted_players[:top_n])
+def add_game(game: Game) -> None:
+    """
+    Adds the game to the game list.
+    """
+    games.append(game)
 
-if __name__ == '__main__':
-    game_data = load_game_data('game_data.json')
-    update_game_score(game_data, 'player1', 300)
-    save_game_data('game_data.json', game_data)
-    top_players = get_top_players(game_data)
-    print(top_players)
+
+def get_game_titles() -> List[str]:
+    """
+    Retrieves the titles of all games in the list.
+    """
+    return [game.title for game in games]
