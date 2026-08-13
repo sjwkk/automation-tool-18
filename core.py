@@ -1,55 +1,23 @@
-from typing import List, Dict, Any
+import time
+import requests
+from requests.exceptions import RequestException
 
-class Game:
-    """
-    Represents a game instance with various configurations and attributes.
-    """
-    def __init__(self, title: str, genre: str, settings: Dict[str, Any]) -> None:
-        self.title = title
-        self.genre = genre
-        self.settings = settings
+def retry_request(url, max_retries=5, delay=2):
+    attempt = 0
+    while attempt < max_retries:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            return response.json()
+        except RequestException as e:
+            attempt += 1
+            print(f"Attempt {attempt} failed: {e}")
+            if attempt < max_retries:
+                time.sleep(delay)
+            else:
+                raise RuntimeError(f"Max retries exceeded for {url}")
 
-    def start(self) -> None:
-        """
-        Starts the game and initializes settings.
-        """
-        print(f"Starting {self.title}...")
-        # Initialize settings, graphics, etc.
-        for key, value in self.settings.items():
-            print(f"Setting {key} to {value}")
-
-    def save(self) -> None:
-        """
-        Saves the current state of the game.
-        """
-        print(f"Saving {self.title}...")
-
-    def load(self) -> None:
-        """
-        Loads the previous game state.
-        """
-        print(f"Loading {self.title}...")
-
-
-def create_game(title: str, genre: str, settings: Dict[str, Any]) -> Game:
-    """
-    Factory function to create a new game instance.
-    """
-    return Game(title, genre, settings)
-
-
-games: List[Game] = []
-
-
-def add_game(game: Game) -> None:
-    """
-    Adds the game to the game list.
-    """
-    games.append(game)
-
-
-def get_game_titles() -> List[str]:
-    """
-    Retrieves the titles of all games in the list.
-    """
-    return [game.title for game in games]
+# Example usage:
+# if __name__ == '__main__':
+#     data = retry_request('https://api.example.com/data')
+#     print(data)
