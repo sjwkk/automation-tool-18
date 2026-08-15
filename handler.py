@@ -1,48 +1,29 @@
-from typing import Dict, Any
+import json
+from typing import List, Dict, Any
 
-class RequestHandler:
-    """
-    A class to handle incoming requests and generate responses.
-    """
 
-    def __init__(self, default_response: str) -> None:
-        """
-        Initialize the RequestHandler with a default response.
-        """
-        self.default_response = default_response
+def load_game_data(file_path: str) -> Dict[str, Any]:
+    with open(file_path, 'r') as file:
+        return json.load(file)
 
-    def handle_request(self, request: Dict[str, Any]) -> str:
-        """
-        Process the incoming request and return a response.
-        
-        Args:
-            request (Dict[str, Any]): The incoming request data.
-        
-        Returns:
-            str: The response for the request.
-        """
-        if 'action' in request:
-            return self.process_action(request['action'])
-        return self.default_response
 
-    def process_action(self, action: str) -> str:
-        """
-        Process the action specified in the request.
-        
-        Args:
-            action (str): The action to process.
-        
-        Returns:
-            str: The result of the action processing.
-        """
-        if action == 'greet':
-            return 'Hello, User!'
-        elif action == 'farewell':
-            return 'Goodbye, User!'
-        return 'Unknown action.'
+def save_game_data(file_path: str, data: Dict[str, Any]) -> None:
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
 
-# Example usage:
-if __name__ == '__main__':
-    handler = RequestHandler('No action performed.')
-    print(handler.handle_request({'action': 'greet'}))
-    print(handler.handle_request({'action': 'unknown'}))
+
+def filter_games_by_genre(game_data: List[Dict[str, Any]], genre: str) -> List[Dict[str, Any]]:
+    return [game for game in game_data if game.get('genre') == genre]
+
+
+def calculate_average_score(game_data: List[Dict[str, Any]]) -> float:
+    total_score = sum(game.get('score', 0) for game in game_data)
+    return total_score / len(game_data) if game_data else 0.0
+
+
+def update_game_score(game_data: List[Dict[str, Any]], game_id: str, new_score: float) -> None:
+    for game in game_data:
+        if game['id'] == game_id:
+            game['score'] = new_score
+            break
+
