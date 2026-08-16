@@ -1,32 +1,37 @@
 import logging
+import os
 
-class GameLogger:
-    def __init__(self, name):
+class Logger:
+    def __init__(self, name, log_file='app.log', level=logging.INFO):
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(logging.DEBUG)
-        handler = logging.FileHandler(f'{name}.log')
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
+        self.logger.setLevel(level)
+        handler = logging.FileHandler(log_file)
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         self.logger.addHandler(handler)
+        self._check_file_size(log_file)
 
-    def debug(self, message):
-        self.logger.debug(message)
+    def _check_file_size(self, log_file):
+        if os.path.exists(log_file) and os.path.getsize(log_file) > 10485760:  # 10 MB limit
+            self.logger.warning('Log file size exceeded. Archiving...')
+            self._archive_log(log_file)
 
-    def info(self, message):
+    def _archive_log(self, log_file):
+        try:
+            os.rename(log_file, log_file.replace('.log', '_backup.log'))
+            self.logger.info('Log archived successfully.')
+        except Exception as e:
+            self.logger.error(f'Error archiving log: {e}')
+
+    def log_info(self, message):
         self.logger.info(message)
 
-    def warning(self, message):
+    def log_warning(self, message):
         self.logger.warning(message)
 
-    def error(self, message):
+    def log_error(self, message):
         self.logger.error(message)
 
-    def critical(self, message):
-        self.logger.critical(message)
-
-# Usage example:
+# Usage example
 if __name__ == '__main__':
-    game_logger = GameLogger('my_game')
-    game_logger.info('Game started')
-    game_logger.warning('Low health warning')
-    game_logger.error('An error occurred')
+    logger = Logger(__name__)
+    logger.log_info('Logger initialized. Happy gaming!')
