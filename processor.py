@@ -1,41 +1,38 @@
+import json
 import random
-import time
+from typing import List, Dict, Any
 
 class GameProcessor:
-    def __init__(self):
-        self.score = 0
-        self.level = 1
+    def __init__(self, data: List[Dict[str, Any]]):
+        self.data = data
+        self.processed_data = []
 
-    def random_event(self):
-        event = random.choice(['bonus', 'trap', 'none'])
-        return event
+    def process_games(self) -> None:
+        self.processed_data = [self._process_single_game(game) for game in self.data]
 
-    def update_score(self, event):
-        if event == 'bonus':
-            self.score += 10 * self.level
-        elif event == 'trap':
-            self.score -= 5 * self.level
-        return self.score
+    def _process_single_game(self, game: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            'name': game['name'],
+            'player_count': self._simulate_player_count(),
+            'rating': self._calculate_rating(game['reviews']),
+        }
 
-    def level_up(self):
-        self.level += 1
-        return self.level
+    def _simulate_player_count(self) -> int:
+        return random.randint(1, 1000)
 
-    def play_turn(self):
-        event = self.random_event()
-        self.update_score(event)
-        if event == 'bonus':
-            print(f'Bonus event! Score: {self.score}')
-        elif event == 'trap':
-            print(f'Trap event! Score: {self.score}')
-        else:
-            print(f'No event. Score remains: {self.score}')
-        if self.score >= 50:
-            self.level_up()
-            print(f'Level up! New level: {self.level}')
+    def _calculate_rating(self, reviews: int) -> float:
+        return min(5.0, round(reviews / 20, 1))
 
+    def get_processed_data(self) -> str:
+        return json.dumps(self.processed_data, indent=4)
+
+# Example usage
 if __name__ == '__main__':
-    processor = GameProcessor()
-    for _ in range(10):
-        processor.play_turn()  
-        time.sleep(1)  
+    game_data = [
+        {'name': 'Game A', 'reviews': 150},
+        {'name': 'Game B', 'reviews': 99},
+        {'name': 'Game C', 'reviews': 250},
+    ]
+    processor = GameProcessor(game_data)
+    processor.process_games()
+    print(processor.get_processed_data())
