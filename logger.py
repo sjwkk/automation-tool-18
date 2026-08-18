@@ -1,37 +1,33 @@
 import logging
-import os
 
-class Logger:
-    def __init__(self, name, log_file='app.log', level=logging.INFO):
+class GameLogger:
+    def __init__(self, name):
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(level)
-        handler = logging.FileHandler(log_file)
-        handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        self.logger.setLevel(logging.DEBUG)
+        handler = logging.FileHandler(f'{name}.log')
+        handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
         self.logger.addHandler(handler)
-        self._check_file_size(log_file)
 
-    def _check_file_size(self, log_file):
-        if os.path.exists(log_file) and os.path.getsize(log_file) > 10485760:  # 10 MB limit
-            self.logger.warning('Log file size exceeded. Archiving...')
-            self._archive_log(log_file)
+    def debug(self, message):
+        self.logger.debug(message)
 
-    def _archive_log(self, log_file):
-        try:
-            os.rename(log_file, log_file.replace('.log', '_backup.log'))
-            self.logger.info('Log archived successfully.')
-        except Exception as e:
-            self.logger.error(f'Error archiving log: {e}')
-
-    def log_info(self, message):
+    def info(self, message):
         self.logger.info(message)
 
-    def log_warning(self, message):
+    def warning(self, message):
         self.logger.warning(message)
 
-    def log_error(self, message):
+    def error(self, message):
         self.logger.error(message)
 
-# Usage example
+    def critical(self, message):
+        self.logger.critical(message)
+
+# Example usage:
 if __name__ == '__main__':
-    logger = Logger(__name__)
-    logger.log_info('Logger initialized. Happy gaming!')
+    game_logger = GameLogger('game_events')
+    game_logger.info('Game started successfully.')
+    game_logger.warning('Low health warning!')
+    game_logger.error('Failed to load level data.')
